@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
+import useAuth from "../../../hooks/useAuth";
 
 const style = {
   position: "absolute",
@@ -19,11 +20,40 @@ const style = {
 
 const BookingModal = ({ handleBookingClose, openBooking, booking, date }) => {
   const { name, time } = booking;
+  const {user} = useAuth();
+  const initialInfo = {patientName: user.displayName, email: user.email, phone:''}
+  const [bookingInfo, setBookingInfo] = useState(initialInfo);
+
+  const handleOnBlur = e => {
+    const field = e.target.name;
+    const value = e.target.value;
+    const newInfo = {...bookingInfo};
+    newInfo[field] = value;
+    setBookingInfo(newInfo)
+  }
 
   const handleBookingSubmit = (e) => {
-    alert('Submitting')
     // Collect date
+    const appointment = {
+      ...bookingInfo,
+      time,
+      serviceName: name,
+      date: date.toLocaleDateString()
+    }
+
     // Send to the server
+    fetch('http://localhost:5000/appointments', {
+      method: 'POST',
+      headers: {
+        'content-type' : 'application/json'
+      },
+      body: JSON.stringify(appointment)
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log(data)
+    })
+
     handleBookingClose();
     e.preventDefault();
   };
@@ -51,19 +81,25 @@ const BookingModal = ({ handleBookingClose, openBooking, booking, date }) => {
             <TextField
               sx={{ width: "90%", m: 1 }}
               id="outlined-size-small"
-              defaultValue="Your name"
+              name="patientName"
+              defaultValue={user.displayName}
+              onBlur={handleOnBlur}
               size="small"
             />
             <TextField
               sx={{ width: "90%", m: 1 }}
               id="outlined-size-small"
-              defaultValue="Your Email"
+              defaultValue={user.email}
+              name="email"
+              onBlur={handleOnBlur}
               size="small"
             />
             <TextField
               sx={{ width: "90%", m: 1 }}
               id="outlined-size-small"
               defaultValue="Your phone"
+              name="phone"
+              onBlur={handleOnBlur}
               size="small"
             />
             <TextField
