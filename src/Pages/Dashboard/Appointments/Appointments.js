@@ -8,15 +8,15 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import useAuth from '../../../hooks/useAuth';
 
-const Appointments = () => {
+const Appointments = ({date}) => {
     const [appointments, setAppointments] = useState([]);
     const {user} = useAuth();
     useEffect(()=>{
-        const url = `http://localhost:5000/appointments?email=${user.email}`
+        const url = `http://localhost:5000/appointments?email=${user.email}&date=${date}`
         fetch(url)
         .then(res => res.json())
         .then(data => setAppointments(data))
-    },[])
+    },[date])
     return (
         <div>
             <h2>Appointments: {appointments.length}</h2>
